@@ -5,5 +5,9 @@ def getFormattedTime(time: datetime):
     return time.strftime(DATE_FORMAT)
 
 
+def getTimeFromString(time: str):
+    return datetime.strptime(time, DATE_FORMAT)
+
+
 def debugPrint(*args, **kwargs):
     print(*args, **kwargs)

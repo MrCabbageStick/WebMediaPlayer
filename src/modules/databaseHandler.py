@@ -4,6 +4,8 @@ from enum import Enum
 from datetime import datetime
 import bcrypt
 from modules.functions import getFormattedTime, debugPrint
+from modules.dataclasses.user import User
+from modules.dataclasses.movie import Movie
 import json
 
 
@@ -65,17 +67,33 @@ class DatabaseHandler:
             return (False, DatabaseHandlerMessages.SQLITE_ERROR)
         
     
-    def getUsers(self) -> tuple[bool, str, list]:
+    def getUsers(self) -> tuple[bool, str, list[User]]:
         """Returns a tuple: (success, message, list of users)"""
 
         if not (self.connection and self.cursor):
             return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED, [])
         
         try:
-            return (True, DatabaseHandlerMessages.SUCCESS, self.cursor.execute("SELECT * FROM users").fetchall())
+            return (True, DatabaseHandlerMessages.SUCCESS, [
+                User(*userData) for userData in self.cursor.execute("SELECT * FROM users").fetchall()
+            ])
         
         except sqlite3.Error as error:
             debugPrint(f"Error: {error}")
             return (False, DatabaseHandlerMessages.SQLITE_ERROR, [])
     
         
+    def getMovies(self) -> tuple[bool, str, list[Movie]]:
+        """Returns a tuple: (success, message, list of movies)"""
+
+        if not (self.connection and self.cursor):
+            return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED, [])
+        
+        try:
+            return (True, DatabaseHandlerMessages.SUCCESS, [
+                Movie(*movieData) for movieData in self.cursor.execute("SELECT * FROM movies").fetchall()
+            ])
+        
+        except sqlite3.Error as error:
+            debugPrint(f"Error: {error}")
+            return (False, DatabaseHandlerMessages.SQLITE_ERROR, [])
