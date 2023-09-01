@@ -9,3 +9,7 @@ python3 -m venv .venv
 source "./.venv/bin/activate"
 
 python -m pip install -r requirements.txt
+
+if [[ ! -f "./src/database/web_player.sqlite" ]]; then
+    cp "./src/database/web_player.empty.sqlite" "./src/database/web_player.sqlite"
+fi
