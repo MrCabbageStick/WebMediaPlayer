@@ -1,2 +1,3 @@
 .venv/
 web_player.sqlite
+__pycache__/
