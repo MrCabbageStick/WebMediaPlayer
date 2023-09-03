@@ -97,3 +97,23 @@ class DatabaseHandler:
         except sqlite3.Error as error:
             debugPrint(f"Error: {error}")
             return (False, DatabaseHandlerMessages.SQLITE_ERROR, [])
+        
+    
+    def addMovie(self, title: str, path: str, thumbnailPath: str, duration: int):
+        """Returns a tuple: (success, message)"""
+
+        if not (self.connection and self.cursor):
+            return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED)
+        
+        try:
+            self.cursor.execute(f'INSERT INTO movies VALUES (NULL, "{title}", "{path}", "{thumbnailPath}", {duration})')
+            self.connection.commit()
+            return (True, DatabaseHandlerMessages.SUCCESS)
+        
+        except sqlite3.Error as error:
+            debugPrint(f"Error: {error}")
+            return (False, DatabaseHandlerMessages.SQLITE_ERROR)
+
+
+
+    

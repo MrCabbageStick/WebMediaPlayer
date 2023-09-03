@@ -10,14 +10,14 @@ database = DatabaseHandler(DATABASE)
 def homePage():
     return render_template("gallery.html")
 
-@app.route("/users")
+@app.route("/movies")
 def usersPage():
-    return jsonify(database.getUsers())
+    return jsonify(database.getMovies())
 
-@app.route("/addUser")
+@app.route("/addMovie")
 def addUserPage():
-    print(database.addUser("osk", "Ośk", "lubie_jelenie", True))
-    return redirect("/users")
+    print(database.addMovie("Test", "/test/test/test", None, 10))
+    return redirect("/movies")
 
 
 
