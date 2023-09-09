@@ -11,14 +11,6 @@ from typing import Callable
 
 
 
-def executeIfConnected(method: Callable):
-    def wrapper(handler):
-        print("Testing")
-        return method(handler)
-
-    return wrapper
-
-
 def SQLExecFunction(emptyReturn = None):
 
     def inner(method: Callable):
