@@ -7,6 +7,45 @@ from modules.functions import getFormattedTime, debugPrint
 from modules.dataclasses.user import User
 from modules.dataclasses.movie import Movie
 import json
+from typing import Callable
+
+
+
+def executeIfConnected(method: Callable):
+    def wrapper(handler):
+        print("Testing")
+        return method(handler)
+
+    return wrapper
+
+
+def SQLExecFunction(emptyReturn = None):
+
+    def inner(method: Callable):
+
+        def wrapper(self, *args, **kwargs):
+
+            if not (self.connection and self.cursor):
+                return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED, emptyReturn) \
+                    if emptyReturn is not None \
+                        else (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED)
+
+            try:
+                if(emptyReturn is not None):
+                    return (True, DatabaseHandlerMessages.SUCCESS, method(self, *args, **kwargs))
+                
+                method(self, *args, **kwargs)
+                return (True, DatabaseHandlerMessages.SUCCESS)
+            
+            except sqlite3.Error as error:
+                debugPrint(f"Error: {error}")
+                return (False, DatabaseHandlerMessages.SQLITE_ERROR, []) \
+                    if emptyReturn is not None \
+                        else (False, DatabaseHandlerMessages.SQLITE_ERROR)
+         
+        return wrapper
+    
+    return inner
 
 
 class DatabaseHandlerMessages:
@@ -44,75 +83,26 @@ class DatabaseHandler:
         return self
     
 
-    def addUser(self, name: str, displayName: str, password: str, isOwner: bool = False) -> tuple[bool, DatabaseHandlerMessages]:
-        """Returns a tuple: (success, message)"""
+    @SQLExecFunction()
+    def addUser(self, name: str, displayName: str, password: str, isOwner: bool = False):
+        self.cursor.execute(f'INSERT INTO users VALUES (NULL, "{name}", "{displayName}", "{password}", "{getFormattedTime(datetime.now())}", {isOwner})')
+        self.connection.commit()
+        
 
-        if not (self.connection and self.cursor):
-            return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED)
-
-        if self.cursor.execute(f"SELECT name FROM users WHERE name='{name}'").rowcount > 0:
-            return (False, DatabaseHandlerMessages.USER_ALREADY_EXISTS)
-        
-        password = password.encode()
-        password = bcrypt.hashpw(password, bcrypt.gensalt())
-        
-        try:
-            self.cursor.execute(f'INSERT INTO users VALUES (NULL, "{name}", "{displayName}", "{password}", "{getFormattedTime(datetime.now())}", {isOwner})')
-            self.connection.commit()
-
-            return (True, "User added succesfully")
-        
-        except sqlite3.Error as error:
-            debugPrint(f"Error: {error}")
-            return (False, DatabaseHandlerMessages.SQLITE_ERROR)
-        
+    @SQLExecFunction(emptyReturn=[])
+    def getUsers(self) -> list[User]:
+        return [User(*userData) for userData in self.cursor.execute("SELECT * FROM users").fetchall()]
     
-    def getUsers(self) -> tuple[bool, str, list[User]]:
-        """Returns a tuple: (success, message, list of users)"""
 
-        if not (self.connection and self.cursor):
-            return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED, [])
+    @SQLExecFunction(emptyReturn=[])
+    def getMovies(self) -> list[Movie]:
+        return [Movie(*movieData) for movieData in self.cursor.execute("SELECT * FROM movies").fetchall()]
         
-        try:
-            return (True, DatabaseHandlerMessages.SUCCESS, [
-                User(*userData) for userData in self.cursor.execute("SELECT * FROM users").fetchall()
-            ])
-        
-        except sqlite3.Error as error:
-            debugPrint(f"Error: {error}")
-            return (False, DatabaseHandlerMessages.SQLITE_ERROR, [])
-    
-        
-    def getMovies(self) -> tuple[bool, str, list[Movie]]:
-        """Returns a tuple: (success, message, list of movies)"""
 
-        if not (self.connection and self.cursor):
-            return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED, [])
-        
-        try:
-            return (True, DatabaseHandlerMessages.SUCCESS, [
-                Movie(*movieData) for movieData in self.cursor.execute("SELECT * FROM movies").fetchall()
-            ])
-        
-        except sqlite3.Error as error:
-            debugPrint(f"Error: {error}")
-            return (False, DatabaseHandlerMessages.SQLITE_ERROR, [])
-        
-    
+    @SQLExecFunction()
     def addMovie(self, title: str, path: str, thumbnailPath: str, duration: int):
-        """Returns a tuple: (success, message)"""
-
-        if not (self.connection and self.cursor):
-            return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED)
-        
-        try:
-            self.cursor.execute(f'INSERT INTO movies VALUES (NULL, "{title}", "{path}", "{thumbnailPath}", {duration})')
-            self.connection.commit()
-            return (True, DatabaseHandlerMessages.SUCCESS)
-        
-        except sqlite3.Error as error:
-            debugPrint(f"Error: {error}")
-            return (False, DatabaseHandlerMessages.SQLITE_ERROR)
+        self.cursor.execute(f'INSERT INTO movies VALUES (NULL, "{title}", "{path}", "{thumbnailPath}", {duration})')
+        self.connection.commit()
 
 
 
