@@ -13,3 +13,7 @@ python -m pip install -r requirements.txt
 if [[ ! -f "./src/database/web_player.sqlite" ]]; then
     cp "./src/database/web_player.empty.sqlite" "./src/database/web_player.sqlite"
 fi
+
+if [[ ! -f "./src/config.json" ]]; then
+    cp "./src/config.empty.json" "./src/config.json"
+fi
