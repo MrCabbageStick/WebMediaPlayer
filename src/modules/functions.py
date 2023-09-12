@@ -9,5 +9,17 @@ def getTimeFromString(time: str):
     return datetime.strptime(time, DATE_FORMAT)
 
 
-def debugPrint(*args, **kwargs):
-    print(*args, **kwargs)
+class Debug:
+
+    @classmethod
+    def debugPrint(cls, *args, **kwargs):
+        print(*args, **kwargs)
+
+    @classmethod
+    def warningPrint(cls, *args, **kwargs):
+        print("[WARNING]:", *args, **kwargs)
+
+    @classmethod
+    def errorPrint(cls, *args, **kwargs):
+        print("[ERROR]:", *args, **kwargs)
+
