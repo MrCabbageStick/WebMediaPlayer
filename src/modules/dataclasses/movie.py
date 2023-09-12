@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Movie:
@@ -7,3 +7,4 @@ class Movie:
     path: str
     thumbnailPath: str
     duration: int
+    genres: list[tuple[int, str]] = field(default_factory=lambda: [])
