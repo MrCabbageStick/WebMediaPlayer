@@ -11,7 +11,7 @@ with open(CONFIG) as configFile:
 app = Flask(__name__)
 
 database = DatabaseHandler(DATABASE)
-movieRegistry = MovieRegistry(*[movieDir["path"] for movieDir in config["movie_directories"]], allowedExtensions=[".mp4"])
+movieRegistry = MovieRegistry(*[movieDir["path"] for movieDir in config["movie_directories"]], allowedExtensions=config["allowed_extensions"])
 
 @app.route("/")
 def homePage():

@@ -4,5 +4,6 @@
             "comment": null,
             "path": null
         }
-    ]
+    ],
+    "allowed_extensions": ["mp4", "webm"]
 }
