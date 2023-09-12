@@ -1,3 +1,5 @@
 .venv/
-web_player.sqlite
 __pycache__/
+
+web_player.sqlite
+config.json
