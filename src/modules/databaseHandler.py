@@ -3,7 +3,7 @@ from typing import Self
 from enum import Enum
 from datetime import datetime
 import bcrypt
-from modules.functions import getFormattedTime, debugPrint
+from modules.functions import getFormattedTime, Debug
 from modules.dataclasses.user import User
 from modules.dataclasses.movie import Movie
 import json
@@ -12,10 +12,14 @@ from typing import Callable
 
 
 def SQLExecFunction(emptyReturn = None):
+    """
+    A decorator function to ensure a valid database connection
+    and handle potential SQLite3 errors.
+    """
 
     def inner(method: Callable):
 
-        def wrapper(self, *args, **kwargs):
+        def wrapper(self, *args, **kwargs) -> tuple[bool, str] | tuple[bool, str, any]:
 
             if not (self.connection and self.cursor):
                 return (False, DatabaseHandlerMessages.CONNECTION_NOT_ESTABLISHED, emptyReturn) \
@@ -30,7 +34,7 @@ def SQLExecFunction(emptyReturn = None):
                 return (True, DatabaseHandlerMessages.SUCCESS)
             
             except sqlite3.Error as error:
-                debugPrint(f"Error: {error}")
+                Debug.errorPrint(error.__str__())
                 return (False, DatabaseHandlerMessages.SQLITE_ERROR, []) \
                     if emptyReturn is not None \
                         else (False, DatabaseHandlerMessages.SQLITE_ERROR)
@@ -89,7 +93,7 @@ class DatabaseHandler:
     @SQLExecFunction(emptyReturn=[])
     def getMovies(self) -> list[Movie]:
         return [Movie(*movieData) for movieData in self.cursor.execute("SELECT * FROM movies").fetchall()]
-        
+    
 
     @SQLExecFunction()
     def addMovie(self, title: str, path: str, thumbnailPath: str, duration: int):

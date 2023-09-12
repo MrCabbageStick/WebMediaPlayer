@@ -1,10 +1,17 @@
 from flask import Flask, render_template, jsonify, redirect
 from modules.databaseHandler import DatabaseHandler
-from modules.paths import DATABASE
+from modules.movieRegistry import MovieRegistry
+from modules.paths import DATABASE, CONFIG
+import json
+
+
+with open(CONFIG) as configFile:
+    config = json.load(configFile)
 
 app = Flask(__name__)
 
 database = DatabaseHandler(DATABASE)
+movieRegistry = MovieRegistry(*[movieDir["path"] for movieDir in config["movie_directories"]], allowedExtensions=[".mp4"])
 
 @app.route("/")
 def homePage():
@@ -26,6 +33,11 @@ def usersPage():
 @app.route("/addUser")
 def addUserPage():
     return jsonify(database.addUser("test", "Testowy", "zaq1@WSX", True))
+
+@app.route("/findMovies")
+def findMoviesPage():
+    movieRegistry.findMovies()
+    return jsonify([path.__str__() for path in movieRegistry.foundFiles])
 
 
 
