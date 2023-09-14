@@ -21,11 +21,11 @@ class MovieRegistry:
         for path in self.paths:
             
             if not path.exists():
-                Debug.warningPrint(f"Path doesn't exist: '{path}'")
+                Debug.warningPrint(f"Path does not exist: '{path}'")
                 continue
 
             if not path.is_dir():
-                Debug.warningPrint(f"Path isn't a directory: '{[path]}'")
+                Debug.warningPrint(f"Path is not a directory: '{path}'")
                 continue
 
             for file in path.iterdir():
