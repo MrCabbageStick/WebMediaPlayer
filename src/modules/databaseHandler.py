@@ -59,7 +59,6 @@ class DatabaseHandler:
     def __init__(self, path: str) -> None:
         
         self.path = path
-        print(f"{self.path=}")
 
     
     def connect(self) -> Self:
